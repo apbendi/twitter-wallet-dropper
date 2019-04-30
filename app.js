@@ -9,6 +9,8 @@ const auth = require('./helpers/auth')
 const cacheRoute = require('./helpers/cache-route')
 const socket = require('./helpers/socket')
 
+const ReceivingUserId = "2193335140"
+
 const app = express()
 
 app.set('port', (process.env.PORT || 5000))
@@ -64,6 +66,15 @@ app.get('/webhook/twitter', function(request, response) {
 app.post('/webhook/twitter', function(request, response) {
 
   console.log(request.body)
+
+  let body = request.body
+  let isDirectMessageEvent = body.for_user_id === ReceivingUserId &&
+                              body.direct_message_events !== undefined &&
+                              Array.isArray(body.direct_message_events)
+
+  if (isDirectMessageEvent) {
+    body.direct_message_events.map(processDirectMessageEvent)
+  }
   
   socket.io.emit(socket.activity_event, {
     internal_id: uuid(),
@@ -73,6 +84,32 @@ app.post('/webhook/twitter', function(request, response) {
   response.send('200 OK')
 })
 
+function processDirectMessageEvent(event) {
+  let isNewMsgToUser = event.type === "message_create" && 
+                        event.message_create.target.recipient_id === ReceivingUserId
+
+  if (!isNewMsgToUser) {
+    return
+  }
+
+  let message = event.message_create.message_data.text
+  let sender = event.message_create.sender_id
+
+  if (isValidDirectMessage(message, sender)) {
+    respondToMessage(message, sender)
+  }
+}
+
+function isValidDirectMessage(message, sender) {
+  // TODO: implement rules here for
+  return true
+}
+
+function respondToMessage(message, sender) {
+  // TODO: Respond to the message with a link, or call out to another service?
+
+  console.log("Message: " + message + " From: " + sender)
+}
 
 /**
  * Serves the home page
