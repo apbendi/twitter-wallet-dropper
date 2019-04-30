@@ -9,13 +9,19 @@ const auth = require('./helpers/auth')
 const cacheRoute = require('./helpers/cache-route')
 const socket = require('./helpers/socket')
 const nconf = require('nconf')
-
-
+var Twit = require('twit')
 
 const app = express()
 
 nconf.file({ file: 'config.json' }).env()
 const ReceivingUserId = nconf.get('BOT_USER_ID')
+
+const Twitter = new Twit({
+  consumer_key:         nconf.get('TWITTER_CONSUMER_KEY'),
+  consumer_secret:      nconf.get('TWITTER_CONSUMER_SECRET'),
+  access_token:         nconf.get('TWITTER_ACCESS_TOKEN'),
+  access_token_secret:  nconf.get('TWITTER_ACCESS_TOKEN_SECRET'),
+})
 
 app.set('port', (process.env.PORT || 5000))
 app.set('views', __dirname + '/views')
@@ -110,9 +116,36 @@ function isValidDirectMessage(message, sender) {
 }
 
 function respondToMessage(message, sender) {
-  // TODO: Respond to the message with a link, or call out to another service?
-
   console.log("Message: " + message + " From: " + sender)
+
+  let responseMessage = generateResponse()
+
+  Twitter.post('direct_messages/events/new', {
+    "event": {
+      "type": "message_create",
+      "message_create": {
+          "target": {
+              "recipient_id": sender
+          },
+          "message_data": {
+              "text": responseMessage
+          }
+      }
+    }
+  }, function (err, data, response) {
+    if (err) {
+      // TODO: Handle errors in some way
+      console.log(err)
+    }
+
+    console.log(data)
+  })
+}
+
+function generateResponse() {
+  // TODO: business logic to generate the link
+
+  return "Hello there friendo!"
 }
 
 /**
