@@ -5,5 +5,7 @@
   "TWITTER_ACCESS_TOKEN_SECRET": "your-access-token-secret",
   "TWITTER_WEBHOOK_ENV": "env-beta",
   "BASIC_AUTH_USER": "admin",
-  "BASIC_AUTH_PASSWORD": "bluebird"
+  "BASIC_AUTH_PASSWORD": "bluebird",
+  "BASE_CALLBACK_URL": "https://your.domain.com",
+  "BOT_USER_ID": "your-numeric-twitter-id"
 }
