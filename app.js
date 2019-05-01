@@ -9,12 +9,17 @@ const auth = require('./helpers/auth')
 const cacheRoute = require('./helpers/cache-route')
 const socket = require('./helpers/socket')
 const nconf = require('nconf')
-var Twit = require('twit')
+const Twit = require('twit')
+const fs = require('fs')
+const os = require('os');
+
+const LINK_DELIMITER = '||'
 
 const app = express()
 
 nconf.file({ file: 'config.json' }).env()
 const ReceivingUserId = nconf.get('BOT_USER_ID')
+const LinksFilePath = nconf.get('LINKS_FILE')
 
 const Twitter = new Twit({
   consumer_key:         nconf.get('TWITTER_CONSUMER_KEY'),
@@ -118,7 +123,9 @@ function isValidDirectMessage(message, sender) {
 function respondToMessage(message, sender) {
   console.log("Message: " + message + " From: " + sender)
 
-  let responseMessage = generateResponse()
+  let responseMessage = generateResponse(sender)
+
+  console.log("Response: " + responseMessage)
 
   Twitter.post('direct_messages/events/new', {
     "event": {
@@ -142,10 +149,37 @@ function respondToMessage(message, sender) {
   })
 }
 
-function generateResponse() {
-  // TODO: business logic to generate the link
+function generateResponse(senderID) {
+  let allLines = fs.readFileSync(LinksFilePath).toString().trim().split(os.EOL)
+  let unusedLinks = []
+  let usedLinks = []
 
-  return "Hello there friendo!"
+  for (var i = 0; i < allLines.length; i++) {
+    let line = allLines[i]
+    let linkSplit = line.split(LINK_DELIMITER)
+
+    if (linkSplit.length > 1) {
+      if (linkSplit[1] === senderID) {
+        return "You've already gotten one!"
+      }
+
+      usedLinks.push(line)
+    } else {
+      unusedLinks.push(line)
+    }
+  }
+
+  if (unusedLinks.length <= 0) {
+    return "Sorry, all the spots have been claimed!"
+  }
+
+  let nextLink = unusedLinks.shift()
+  usedLinks.push(nextLink + LINK_DELIMITER + senderID)
+
+  let updatedFileContents = usedLinks.concat(unusedLinks).join(os.EOL)
+  fs.writeFileSync(LinksFilePath, updatedFileContents)
+
+  return nextLink
 }
 
 /**
