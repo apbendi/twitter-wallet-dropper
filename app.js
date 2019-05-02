@@ -142,11 +142,13 @@ function processTweetCreateEvent(event) {
   }
 
   let sender = event.user.id_str;
+  let handle = "@" + event.user.screen_name;
+  let statusID = event.id_str;
   if (sender === ReceivingUserId) {
     return;
   }
 
-  respondToMessage(event.text, sender)
+  respondToMessage(event.text, sender, handle, statusID)
 }
 
 function containsCorrectHashtag(entities) {
@@ -164,7 +166,7 @@ function containsCorrectHashtag(entities) {
   return correctHashtags.length > 0;
 }
 
-function respondToMessage(message, sender) {
+function respondToMessage(message, sender, handle, statusID) {
   console.log("Message: " + message + " From: " + sender)
 
   let responseMessage = generateResponse(sender)
@@ -187,10 +189,27 @@ function respondToMessage(message, sender) {
     if (err) {
       // TODO: Handle errors in some way
       console.log(err)
+
+      if(handle !== undefined && statusID !== undefined) {
+        tweetFailureResponse(handle, statusID);
+      }
     }
 
     console.log(data)
   })
+}
+
+function tweetFailureResponse(handle, statusID) {
+  Twitter.post('statuses/update', {
+    status: handle + " seems I'm not allowed to DM you-- can you send a Direct Message to me first?",
+    in_reply_to_status_id: statusID
+  }, function (err, data, response) {
+    if (err) {
+      console.log(err);
+    } else {
+      console.log(data);
+    }
+  });
 }
 
 function generateResponse(senderID) {
