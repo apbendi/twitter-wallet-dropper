@@ -20,7 +20,7 @@ const app = express()
 nconf.file({ file: 'config.json' }).env()
 const ReceivingUserId = nconf.get('BOT_USER_ID')
 const LinksFilePath = nconf.get('LINKS_FILE')
-const MagicHashtag = 'UpDog'
+const MagicHashtag = nconf.get('MAGIC_HASHTAG')
 
 const Twitter = new Twit({
   consumer_key:         nconf.get('TWITTER_CONSUMER_KEY'),

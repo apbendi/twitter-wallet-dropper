@@ -8,5 +8,6 @@
   "BASIC_AUTH_PASSWORD": "bluebird",
   "BASE_CALLBACK_URL": "https://your.domain.com",
   "BOT_USER_ID": "your-numeric-twitter-id",
-  "LINKS_FILE": "./path/to/wallet/file.txt"
+  "LINKS_FILE": "./path/to/wallet/file.txt",
+  "MAGIC_HASHTAG": "YourMagicHashtagWithoutAPoundSignPlease"
 }
