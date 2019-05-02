@@ -20,6 +20,7 @@ const app = express()
 nconf.file({ file: 'config.json' }).env()
 const ReceivingUserId = nconf.get('BOT_USER_ID')
 const LinksFilePath = nconf.get('LINKS_FILE')
+const MagicHashtag = 'UpDog'
 
 const Twitter = new Twit({
   consumer_key:         nconf.get('TWITTER_CONSUMER_KEY'),
@@ -83,12 +84,21 @@ app.post('/webhook/twitter', function(request, response) {
   console.log(request.body)
 
   let body = request.body
+
   let isDirectMessageEvent = body.for_user_id === ReceivingUserId &&
                               body.direct_message_events !== undefined &&
                               Array.isArray(body.direct_message_events)
 
   if (isDirectMessageEvent) {
     body.direct_message_events.map(processDirectMessageEvent)
+  }
+
+  let isTweetCreateEvent = body.for_user_id === ReceivingUserId &&
+                            body.tweet_create_events !== undefined &&
+                            Array.isArray(body.tweet_create_events)
+
+  if (isTweetCreateEvent) {
+    body.tweet_create_events.forEach(processTweetCreateEvent)
   }
   
   socket.io.emit(socket.activity_event, {
@@ -118,6 +128,40 @@ function processDirectMessageEvent(event) {
 function isValidDirectMessage(message, sender) {
   // TODO: implement rules here for
   return true
+}
+
+function processTweetCreateEvent(event) {
+  console.log("event")
+  console.log(event)
+  console.log("entities")
+  console.log(event.entities)
+
+  if (!containsCorrectHashtag(event.entities)) {
+    console.log("No hashtag in entities");
+    return;
+  }
+
+  let sender = event.user.id_str;
+  if (sender === ReceivingUserId) {
+    return;
+  }
+
+  respondToMessage(event.text, sender)
+}
+
+function containsCorrectHashtag(entities) {
+  let hasHashtags = entities.hashtags !== undefined && 
+                      Array.isArray(entities.hashtags) &&
+                      entities.hashtags.length > 0;
+
+  if(!hasHashtags)  {
+    return false;
+  }
+
+  let correctHashtags = entities.hashtags
+                          .filter( hashtag => hashtag.text.toLowerCase() === MagicHashtag.toLowerCase() );
+
+  return correctHashtags.length > 0;
 }
 
 function respondToMessage(message, sender) {
