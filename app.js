@@ -187,11 +187,11 @@ function respondToMessage(message, sender, handle, statusID) {
     }
   }, function (err, data, response) {
     if (err) {
-      // TODO: Handle errors in some way
       console.log(err)
 
       if(handle !== undefined && statusID !== undefined) {
         tweetFailureResponse(handle, statusID);
+        freeUsedWalletFor(sender);
       }
     }
 
@@ -243,6 +243,26 @@ function generateResponse(senderID) {
   fs.writeFileSync(LinksFilePath, updatedFileContents)
 
   return nextLink
+}
+
+function freeUsedWalletFor(senderID) {
+
+  let allLines = fs.readFileSync(LinksFilePath).toString().trim().split(os.EOL);
+  let finalLines = [];
+
+  for (var i = 0; i < allLines.length; i++) {
+    let line = allLines[i];
+    let linkSplit = line.split(LINK_DELIMITER);
+
+    if (linkSplit.length > 1 && linkSplit[1] === senderID) {
+      finalLines.push(linkSplit[0]);
+    } else {
+      finalLines.push(line);
+    }
+  }
+
+  let updatedFileContents = finalLines.join(os.EOL);
+  fs.writeFileSync(LinksFilePath, updatedFileContents);
 }
 
 /**
