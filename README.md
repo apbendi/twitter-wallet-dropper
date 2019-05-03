@@ -1,6 +1,6 @@
-# account-activity-dashboard
+# twitter-wallet-dropper
 
-Sample web app and helper scripts to get started with Twitter's premium Account Activity API (All Activities). Written in Node.js. Full documentation for this API can be found on developer.twitter.com [here](https://developer.twitter.com/en/docs/accounts-and-users/subscribe-account-activity/overview).
+A truly hacky Twitter bot for dropping burner wallets in your DMs. Made by duct-taping some terrible ecmascript on top of [Twitter's webhook boilerplate](https://github.com/twitterdev/twitter-webhook-boilerplate-node). For the love of all that is sacred, do not use this code.
 
 ## Dependencies
 
