@@ -236,7 +236,9 @@ function generateResponse(senderID) {
   let updatedFileContents = usedLinks.concat(unusedLinks).join(os.EOL)
   fs.writeFileSync(LinksFilePath, updatedFileContents)
 
-  return nextLink
+  let message = "Thanks for playing! Open this link on mobile or in a browser *without* MetaMask or any other injected web3. If your browser has MetaMask, try an incognito window!";
+
+  return message + " " + nextLink;
 }
 
 function freeUsedWalletFor(senderID) {
