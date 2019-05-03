@@ -195,7 +195,7 @@ function respondToMessage(message, sender, handle, statusID) {
 
 function tweetFailureResponse(handle, statusID) {
   Twitter.post('statuses/update', {
-    status: handle + " seems I'm not allowed to DM you-- can you send a Direct Message to me first?",
+    status: handle + " Since your Direct Messages are closed, can you send a DM to me first? I'll respond with a burner!",
     in_reply_to_status_id: statusID
   }, function (err, data, response) {
     if (err) {
