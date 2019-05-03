@@ -131,13 +131,7 @@ function isValidDirectMessage(message, sender) {
 }
 
 function processTweetCreateEvent(event) {
-  console.log("event")
-  console.log(event)
-  console.log("entities")
-  console.log(event.entities)
-
   if (!containsCorrectHashtag(event.entities)) {
-    console.log("No hashtag in entities");
     return;
   }
 
